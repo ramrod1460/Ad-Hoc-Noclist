@@ -1,0 +1,5 @@
+docker run --rm -p 8888:8888 adhocteam/noclist
+
+run java -jar target\SpringBootRestfulClient-0.0.1-SNAPSHOT.jar > norm 2> err
+
+Usefull sample ReST dummy data: dummy.restapiexample.com
