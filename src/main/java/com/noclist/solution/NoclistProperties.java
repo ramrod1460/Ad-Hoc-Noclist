@@ -11,12 +11,12 @@ import lombok.Data;
 @SuppressWarnings({"PMD.AvoidCatchingGenericException","PMD.AtLeastOneConstructor","PMD.SystemPrintln","PMD.LongVariable","PMD.LawOfDemeter","PMD.CommentRequired","PMD.DataflowAnomalyAnalysis","PMD.DoNotCallSystemExit"})
 public class NoclistProperties {
 
-	// Users part of URL for API calls
+	// base of URI for API calls
+	private String base;
+	// users call part of base URI 
 	private String users;
-
-	// URL for API calls
-	private String urlUsers;
-	private String urlAuthToken;
+	// auth call part of base URI 
+	private String auth;
 
 	// Header tokens 
 	private String badsecAuthenticationToken;

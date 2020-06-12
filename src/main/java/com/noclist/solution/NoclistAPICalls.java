@@ -21,6 +21,7 @@ import net.minidev.json.JSONArray;
  * @author User
  *
  */
+@SuppressWarnings({"PMD.BeanMembersShouldSerialize","PMD.AvoidFinalLocalVariable","PMD.AvoidCatchingGenericException","PMD.AtLeastOneConstructor","PMD.SystemPrintln","PMD.LongVariable","PMD.LawOfDemeter","PMD.CommentRequired","PMD.CommentSize","PMD.DataflowAnomalyAnalysis","PMD.DoNotCallSystemExit"})
 @Service
 public class NoclistAPICalls {
 
@@ -28,8 +29,8 @@ public class NoclistAPICalls {
 	private NoclistProperties properties;
 
 	@Autowired
-	public void setApp(NoclistProperties properties) {
-	    this.properties = properties;
+	public void setApp(final NoclistProperties properties) {
+		this.properties = properties;
 	}
 	
 	/**
@@ -43,32 +44,30 @@ public class NoclistAPICalls {
 		int attempts = properties.getMaxAttempts();
 
 		// Retrieve a security token
-		ResponseEntity<String> response = null; 
+		final ResponseEntity<String> response = null; 
 		String authToken = ""; 
 		HttpHeaders headers = null; 
-		
+
 		do {
 			attempts--;
-			
+
 			try {
-				response = template.exchange(properties.getUrlAuthToken(), HttpMethod.GET, null, String.class);
-				headers = response.getHeaders();
+				// Per instructions ...avoid the -large amount of useless data-  associated with the response body
+				// by pulling in only the response headers.
+				headers = template.headForHeaders(properties.getBase() + properties.getAuth());
 				
-				if ( ! response.getStatusCode().equals(HttpStatus.OK) || headers.containsKey(properties.getBadsecAuthenticationToken()) &&  ! headers.getFirst(properties.getBadsecAuthenticationToken()).isEmpty() ) {
+				if ( headers != null && headers.containsKey(properties.getBadsecAuthenticationToken()) && ! headers.getFirst(properties.getBadsecAuthenticationToken()).isEmpty() ) {
 					authToken = headers.getFirst(properties.getBadsecAuthenticationToken());
+					System.err.println("Badsec-Authentication-Token security token is :"+authToken);
 					break;
 				} else {
-					// Give server a second to -potentially- recover
+					// Give server a moment to -potentially- recover
 					Thread.sleep(properties.getSleepTime());
 					System.err.println(properties.getBadsecAuthenticationToken()+" unavailable ...status code: "+response.getStatusCode());
 				}
 			} catch(ResourceAccessException e) {
 				System.err.println(properties.getBadsecAuthenticationToken()+" unexpected exception: "+e.getLocalizedMessage());
 				Thread.sleep(properties.getSleepTime());
-				continue;
-			} catch(Exception e) {
-				System.err.println(properties.getBadsecAuthenticationToken()+" unexpected exception: "+e.getLocalizedMessage());
-				break;
 			} 
 
 		} while (response == null && attempts > 0);
@@ -106,7 +105,7 @@ public class NoclistAPICalls {
 			
 			try {
 				// call users API
-				response = template.exchange(properties.getUrlUsers(), HttpMethod.GET, entity, String.class); 
+				response = template.exchange(properties.getBase()+properties.getUsers(), HttpMethod.GET, entity, String.class); 
 			} catch(ResourceAccessException e) {
 				System.err.println("User API unexpected exception : "+e.getLocalizedMessage());
 				continue;

@@ -1,52 +1,65 @@
 package com.noclist.solution;
 
-import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
 
+/**
+ * Main driver class for retrieving the user list
+ * 
+ * Relies on separate method calls for deriving a security token and the actual
+ * list of users
+ * 
+ * Relies on entries in the applicatino.properties file to direct to the appropriate
+ * noclist server address as well as for the specification of the appropriate http
+ * header token names/values ....this is specified in properties file for flexibility.
+ * 
+ * @author User
+ *
+ */
 @Service
-@SuppressWarnings({"PMD.AvoidCatchingGenericException","PMD.AtLeastOneConstructor","PMD.SystemPrintln","PMD.LongVariable","PMD.LawOfDemeter","PMD.CommentRequired","PMD.DataflowAnomalyAnalysis","PMD.DoNotCallSystemExit"})
+@SuppressWarnings({"PMD.BeanMemberShouldSerialize","PMD.AvoidCatchingGenericException","PMD.AtLeastOneConstructor","PMD.SystemPrintln","PMD.LongVariable","PMD.LawOfDemeter","PMD.CommentRequired","PMD.CommentSize","PMD.DataflowAnomalyAnalysis","PMD.DoNotCallSystemExit"})
 public class NoclistRunner implements CommandLineRunner {
 
-	// Inject via application.properties
-	private NoclistProperties properties;
+	@Autowired
+	private ValidProperties validProperties;
 
 	@Autowired
-	public void setApp(NoclistProperties properties) {
-	    this.properties = properties;
-	}
-	
+	private NoclistAPICalls noclistAPICalls;
+
 	@Autowired
-	private NoclistAPICalls apiCall;
-	
+	private ChecksumGenerator checksumGenerator;
+
 	@Override
 	public void run(final String... args) {
 
 		// Set system exit status - assume failure
 		int exitStatus = 1;
 
-		// Retrieve a security token
-		try {
-			final String token = apiCall.getAuthToken();
+		// Validate requisite app properties exist
+		if (validProperties.validateProperties() ) {
+			try {
 
-			if ( ! token.isEmpty() ) {
-				// Continue processing to retrieve user list
-				System.err.println("Badsec-Authentication-Token security token is :"+token);
+				// Retrieve a security token
+				final String token = noclistAPICalls.getAuthToken();
 
-				// Create a SHA256 checksum token
-				final String sha256hex = DigestUtils.sha256Hex(token+properties.getUsers());
-				System.err.println("Checksum Token :"+sha256hex);
+				if ( ! token.isEmpty() ) {
+					// Continue processing to retrieve user list
 
-				// Make call to retrieve list of users - I assume an empty list is ok
-				exitStatus = apiCall.userList(sha256hex);
-			} 
-		} catch ( InterruptedException e ) {
-			System.err.println("Unexpected InterruptedException exception: "+e.getLocalizedMessage());
-			exitStatus = 1;
-		} catch ( Exception e ) {
-			System.err.println("Unexpected exception: "+e.getLocalizedMessage());
-			exitStatus = 2;
+					// Create a SHA256 checksum token
+					final String sha256hex = checksumGenerator.generateChecksum(token);
+
+					// Make call to retrieve list of users - I *assume* an empty list is ok
+					exitStatus = noclistAPICalls.userList(sha256hex);
+				} 
+
+			} catch ( InterruptedException e ) {
+				System.err.println("Unexpected InterruptedException exception: "+e.getLocalizedMessage());
+				exitStatus = 1;
+			} catch ( Exception e ) {
+				System.err.println("Unexpected exception: "+e.getLocalizedMessage());
+				exitStatus = 2;
+			}
 		}
 
 		System.err.println("Exit status : "+exitStatus);
