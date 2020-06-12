@@ -48,6 +48,9 @@ public class NoclistAPICalls {
 		String authToken = ""; 
 		HttpHeaders headers = null; 
 
+		// Alternatively use org.springframework.web.client.ResponseExtractor on HttpResponse to drop
+		// body while still being able to view HttpResponse
+		
 		do {
 			attempts--;
 
