@@ -48,16 +48,26 @@ public class NoclistAPICalls {
 		String authToken = ""; 
 		HttpHeaders headers = null; 
 
-		// Alternatively use org.springframework.web.client.ResponseExtractor on HttpResponse to drop
-		// body while still being able to view HttpResponse
-		
 		do {
 			attempts--;
 
 			try {
 				// Per instructions ...avoid the -large amount of useless data-  associated with the response body
 				// by pulling in only the response headers.
-				headers = template.headForHeaders(properties.getBase() + properties.getAuth());
+				
+				headers = template.execute((properties.getBase() + properties.getAuth()), 
+						HttpMethod.GET, 
+						null,
+						clientResponse -> {
+							HttpHeaders responseHeaders = null;
+							if ( clientResponse.getStatusCode().equals(HttpStatus.OK) ) {
+								responseHeaders = clientResponse.getHeaders();
+							} else {
+								responseHeaders.set("StatusCode", clientResponse.getStatusCode().toString());
+							}
+							clientResponse.close();
+							return responseHeaders;
+						});
 				
 				if ( headers != null && headers.containsKey(properties.getBadsecAuthenticationToken()) && ! headers.getFirst(properties.getBadsecAuthenticationToken()).isEmpty() ) {
 					authToken = headers.getFirst(properties.getBadsecAuthenticationToken());
