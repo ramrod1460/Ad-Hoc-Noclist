@@ -59,17 +59,14 @@ public class NoclistAPICalls {
 						HttpMethod.GET, 
 						null,
 						clientResponse -> {
-							HttpHeaders responseHeaders = null;
-							if ( clientResponse.getStatusCode().equals(HttpStatus.OK) ) {
-								responseHeaders = clientResponse.getHeaders();
-							} else {
-								responseHeaders.set("StatusCode", clientResponse.getStatusCode().toString());
-							}
+							HttpHeaders responseHeaders = clientResponse.getHeaders();
+							responseHeaders.set("StatusCode", clientResponse.getStatusCode().toString());
+
 							clientResponse.close();
 							return responseHeaders;
 						});
 				
-				if ( headers != null && headers.containsKey(properties.getBadsecAuthenticationToken()) && ! headers.getFirst(properties.getBadsecAuthenticationToken()).isEmpty() ) {
+				if ( headers != null && headers.getFirst("StatusCode").startsWith("200") && headers.containsKey(properties.getBadsecAuthenticationToken()) && ! headers.getFirst(properties.getBadsecAuthenticationToken()).isEmpty() ) {
 					authToken = headers.getFirst(properties.getBadsecAuthenticationToken());
 					System.err.println("Badsec-Authentication-Token security token is :"+authToken);
 					break;
