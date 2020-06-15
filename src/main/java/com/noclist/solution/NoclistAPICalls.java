@@ -44,9 +44,7 @@ public class NoclistAPICalls {
 		int attempts = properties.getMaxAttempts();
 
 		// Retrieve a security token
-		final ResponseEntity<String> response = null; 
-		String authToken = ""; 
-		HttpHeaders headers = null; 
+		String authToken = "";
 
 		do {
 			attempts--;
@@ -54,20 +52,14 @@ public class NoclistAPICalls {
 			try {
 				// Per instructions ...avoid the -large amount of useless data-  associated with the response body
 				// by pulling in only the response headers.
-				
-				headers = template.execute((properties.getBase() + properties.getAuth()), 
-						HttpMethod.GET, 
-						null,
-						clientResponse -> {
-							HttpHeaders responseHeaders = clientResponse.getHeaders();
-							responseHeaders.set("StatusCode", clientResponse.getStatusCode().toString());
+				// Void as a response body type indicates that body is not required and is going to be discarded
+				final ResponseEntity<Void> response = template.exchange(properties.getBase() + properties.getAuth(),
+						HttpMethod.GET, null, Void.class);
+				HttpHeaders headers = response.getHeaders();
 
-							clientResponse.close();
-							return responseHeaders;
-						});
-				
-				if ( headers != null && headers.getFirst("StatusCode").startsWith("200") && headers.containsKey(properties.getBadsecAuthenticationToken()) && ! headers.getFirst(properties.getBadsecAuthenticationToken()).isEmpty() ) {
-					authToken = headers.getFirst(properties.getBadsecAuthenticationToken());
+				String token = headers.getFirst(properties.getBadsecAuthenticationToken());
+				if (response.getStatusCode() == HttpStatus.OK && token != null) {
+					authToken = token;
 					System.err.println("Badsec-Authentication-Token security token is :"+authToken);
 					break;
 				} else {
@@ -80,7 +72,7 @@ public class NoclistAPICalls {
 				Thread.sleep(properties.getSleepTime());
 			} 
 
-		} while (response == null && attempts > 0);
+		} while (authToken.isEmpty() && attempts > 0);
 
 		return authToken;
 
