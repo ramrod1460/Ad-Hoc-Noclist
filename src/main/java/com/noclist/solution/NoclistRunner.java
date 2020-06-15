@@ -1,5 +1,9 @@
 package com.noclist.solution;
 
+import java.util.List;
+import java.util.Optional;
+
+import net.minidev.json.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
@@ -41,17 +45,26 @@ public class NoclistRunner implements CommandLineRunner {
 			try {
 
 				// Retrieve a security token
-				final String token = noclistAPICalls.getAuthToken();
+				final Optional<String> token = noclistAPICalls.getAuthToken();
 
-				if ( ! token.isEmpty() ) {
+				if (token.isPresent()) {
 					// Continue processing to retrieve user list
 
 					// Create a SHA256 checksum token
-					final String sha256hex = checksumGenerator.generateChecksum(token);
+					final String sha256hex = checksumGenerator.generateChecksum(token.get());
 
 					// Make call to retrieve list of users - I *assume* an empty list is ok
-					exitStatus = noclistAPICalls.userList(sha256hex);
-				} 
+					Optional<List<String>> userList = noclistAPICalls.userList(sha256hex);
+					if (userList.isPresent()) {
+						// to JSON
+						final JSONArray jsArray = new JSONArray();
+						jsArray.addAll(userList.get());
+						System.out.println(jsArray.toString());
+						exitStatus = 0;
+					}
+				} else {
+					System.err.println("Cannot get the auth token within the max number of attempts");
+				}
 
 			} catch ( InterruptedException e ) {
 				System.err.println("Unexpected InterruptedException exception: "+e.getLocalizedMessage());
