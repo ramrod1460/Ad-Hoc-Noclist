@@ -26,15 +26,22 @@ period of time between retries of a failure in communicating with the auth or us
 
 Base URI for API calls
 **noclist.base** = http://0.0.0.0:8888
+
 Users part of URL for API calls
 **noclist.users**=/users
+
 Auth part of URL for API calls
 **noclist.auth**=/auth
-Header tokens 
+
+Header tokens:
+
 **noclist.BadsecAuthentication_token**=Badsec-Authentication-Token
+
 **noclist.XRequestToken**=X-Request-Checksum
+
 Max attempts to API calls
 **noclist.MaxAttempts**=3
+
 Sleep time on API retry ...can be 0 
 **noclist.SleepTime**=1000
 
