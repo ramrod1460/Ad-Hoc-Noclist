@@ -7,7 +7,11 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
+<<<<<<< HEAD
 * Just a merge test
+=======
+* Merge test 2
+>>>>>>> origin/Dev
 */
 class RetrierTest {
 
