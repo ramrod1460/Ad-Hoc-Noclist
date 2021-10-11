@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 /**
 * Merge test 2
 * Merge test 3
+* Merge test 4
 */
 class RetrierTest {
 
