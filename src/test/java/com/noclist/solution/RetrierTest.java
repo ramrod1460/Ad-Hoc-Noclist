@@ -6,6 +6,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+/**
+* Just a merge test
+*/
 class RetrierTest {
 
     @Test
