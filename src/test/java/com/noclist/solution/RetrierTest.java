@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 * Test 10 made on Dev Branch
 * Test 11 made on Dev Branch
 * Test 13 made on Dev Branch
+* Test 12 made on Master Branch
 */
 class RetrierTest {
 
